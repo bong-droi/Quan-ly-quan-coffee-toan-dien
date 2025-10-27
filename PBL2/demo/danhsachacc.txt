@@ -1,8 +1,0 @@
-binh 0606 1
-thao 1303 0
-truc 0405 0
-th 12 0
-b 1 0
-trucc 121 0
-bong 0606 1
-binh tran 112 0
