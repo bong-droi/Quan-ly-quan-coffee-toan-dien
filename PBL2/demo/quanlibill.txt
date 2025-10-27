@@ -1,0 +1,44 @@
+
+Hoa don luc: 17:0:11 30/12/2024
+Latte nong - 39000 VND x 4 = 156000 VND
+Sinh to Bo - 35000 VND x 2 = 70000 VND
+Tra thao moc - 25000 VND x 4 = 100000 VND
+Tong tien: 326000 VND
+
+Hoa don luc: 17:1:33 30/12/2024
+Nuoc suoi - 20000 VND x 2 = 40000 VND
+Sinh to Bo - 35000 VND x 3 = 105000 VND
+Tra Sua Truyen Thong - 30000 VND x 1 = 30000 VND
+Tra thao moc - 25000 VND x 2 = 50000 VND
+Tong tien: 225000 VND
+
+Hoa don luc: 17:2:4 30/12/2024
+Coca Cola - 15000 VND x 6 = 90000 VND
+Latte nong - 39000 VND x 3 = 117000 VND
+Nuoc suoi - 20000 VND x 4 = 80000 VND
+Sua chua da - 29000 VND x 4 = 116000 VND
+Tong tien: 403000 VND
+
+Hoa don luc: 17:2:25 30/12/2024
+Latte nong - 39000 VND x 2 = 78000 VND
+Sinh to Bo - 35000 VND x 1 = 35000 VND
+Tra Sua Truyen Thong - 30000 VND x 1 = 30000 VND
+Tong tien: 143000 VND
+
+Hoa don luc: 17:3:8 30/12/2024
+Latte nong - 39000 VND x 1 = 39000 VND
+Tong tien: 39000 VND
+
+Hoa don luc: 9:2:42 6/1/2025
+Coca Cola - 15000 VND x 2 = 30000 VND
+Nuoc suoi - 20000 VND x 2 = 40000 VND
+Tong tien: 70000 VND
+
+Hoa don luc: 9:2:41 10/1/2025
+Sua bo tuoi - 25000 VND x 1 = 25000 VND
+Tong tien: 25000 VND
+
+Hoa don luc: 15:42:24 10/9/2025
+Latte nong - 39000 VND x 1 = 39000 VND
+Tong tien: 39000 VND
+
