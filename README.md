@@ -59,12 +59,13 @@ Dự án được phát triển theo mô hình **Client – Server**, áp dụng
 ---
 
 ## 4. Kiến trúc hệ thống
-Hệ thống được xây dựng theo mô hình **MVC (Model – View – Controller)**:
-- **Model**: Định nghĩa cấu trúc dữ liệu và nghiệp vụ
-- **View**: Giao diện người dùng
-- **Controller (View trong Django)**: Xử lý logic và điều hướng
+Hệ thống được xây dựng theo kiến trúc **MVT (Model – View – Template)** của Django:
 
-Cấu trúc project được tổ chức rõ ràng theo từng module chức năng.
+- **Model**: Định nghĩa cấu trúc dữ liệu, ánh xạ cơ sở dữ liệu thông qua Django ORM và xử lý nghiệp vụ.
+- **View**: Tiếp nhận request từ người dùng, xử lý logic nghiệp vụ và trả về response tương ứng.
+- **Template**: Xây dựng giao diện người dùng bằng HTML, CSS và JavaScript.
+
+Kiến trúc MVT giúp hệ thống có cấu trúc rõ ràng, dễ bảo trì, dễ mở rộng và phù hợp với các ứng dụng web quy mô vừa và lớn.
 
 ---
 
