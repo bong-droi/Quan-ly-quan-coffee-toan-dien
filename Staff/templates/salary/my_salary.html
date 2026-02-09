@@ -1,0 +1,513 @@
+{% comment %} {% extends 'base.html' %}
+{% load static humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="fas fa-money-bill-wave"></i> Lương Của Tôi</h4>
+        </div>
+        <div class="card-body">
+            <!-- Summary -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h6>Tổng Thu Nhập</h6>
+                            <h3>{{ total_earned|intcomma }} ₫</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h6>Tháng Đã Thanh Toán</h6>
+                            <h3>{{ paid_salaries }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h6>Tổng Tháng</h6>
+                            <h3>{{ salaries.count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Salary History -->
+            <h5>Lịch Sử Lương</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tháng/Năm</th>
+                            <th>Tổng Giờ Làm</th>
+                            <th>Số Ca</th>
+                            <th>Lương Cơ Bản</th>
+                            <th>Thưởng</th>
+                            <th>Tổng Lương</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salary in salaries %}
+                        <tr>
+                            <td>{{ salary.month }}/{{ salary.year }}</td>
+                            <td>{{ salary.total_hours }} giờ</td>
+                            <td>{{ salary.total_shifts }} ca</td>
+                            <td>{{ salary.base_salary|intcomma }} ₫</td>
+                            <td>
+                                <span class="text-success">+{{ salary.bonus|intcomma }}</span><br>
+                                <span class="text-danger">-{{ salary.deduction|intcomma }}</span>
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ salary.total_salary|intcomma }} ₫</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if salary.status == 'paid' %}success
+                                                    {% elif salary.status == 'calculated' %}info
+                                                    {% else %}warning{% endif %}">
+                                    {{ salary.get_status_display }}
+                                </span>
+                                {% if salary.paid_date %}
+                                <br><small>{{ salary.paid_date|date:"d/m/Y" }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'my_salary_detail' salary.pk %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file-invoice"></i> Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i><br>
+                                Chưa có thông tin lương.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% endcomment %}
+
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header với gradient giống các template khác -->
+    <div class="header-card mb-4">
+        <div class="d-flex align-items-center">
+            <div class="header-icon me-3">
+                <i class="fas fa-money-bill-wave fa-3x text-white"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 text-white"><i class="fas fa-money-bill-wave me-2"></i> Lương Của Tôi</h2>
+                <p class="text-white mb-0 opacity-75">Xem lịch sử và chi tiết lương của bạn</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="summary-card total-income">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="summary-icon me-3">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Tổng Thu Nhập</h6>
+                            <small class="text-white opacity-75">Tất cả lương đã thanh toán</small>
+                        </div>
+                    </div>
+                    <h3 class="mb-0">{{ total_earned|intcomma }} ₫</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="summary-card paid-months">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="summary-icon me-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Tháng Đã Thanh Toán</h6>
+                            <small class="text-white opacity-75">Số tháng lương đã nhận</small>
+                        </div>
+                    </div>
+                    <h3 class="mb-0">{{ paid_salaries }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="summary-card total-months">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="summary-icon me-3">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Tổng Tháng</h6>
+                            <small class="text-white opacity-75">Tất cả tháng có lương</small>
+                        </div>
+                    </div>
+                    <h3 class="mb-0">{{ salaries.count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Salary History -->
+    <div class="main-card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-history me-2"></i> Lịch Sử Lương</h4>
+        </div>
+        <div class="card-body">
+            {% if salaries %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tháng/Năm</th>
+                            <th>Tổng Giờ Làm</th>
+                            <th>Số Ca</th>
+                            <th>Lương Cơ Bản</th>
+                            <th>Thưởng/Khấu Trừ</th>
+                            <th>Tổng Lương</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salary in salaries %}
+                        <tr>
+                            <td>
+                                <div class="month-badge">{{ salary.month }}/{{ salary.year }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock me-2 text-primary"></i>
+                                    {{ salary.total_hours }} giờ
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-check me-2 text-success"></i>
+                                    {{ salary.total_shifts }} ca
+                                </div>
+                            </td>
+                            <td>
+                                <div class="salary-amount">
+                                    <i class="fas fa-money-bill-wave me-2 text-warning"></i>
+                                    {{ salary.base_salary|intcomma }} ₫
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-success mb-1">
+                                        <i class="fas fa-plus-circle me-1"></i>+{{ salary.bonus|intcomma }} ₫
+                                    </span>
+                                    <span class="text-danger">
+                                        <i class="fas fa-minus-circle me-1"></i>-{{ salary.deduction|intcomma }} ₫
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="total-salary">
+                                    <i class="fas fa-wallet me-2"></i>
+                                    <strong>{{ salary.total_salary|intcomma }} ₫</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ salary.status }}">
+                                    <i class="fas 
+                                        {% if salary.status == 'paid' %}fa-check-circle
+                                        {% elif salary.status == 'calculated' %}fa-calculator
+                                        {% else %}fa-clock{% endif %} me-1">
+                                    </i>
+                                    {{ salary.get_status_display }}
+                                </span>
+                                {% if salary.paid_date %}
+                                <br>
+                                <small class="text-muted">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    {{ salary.paid_date|date:"d/m/Y" }}
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'my_salary_detail' salary.pk %}" class="btn-action btn-info">
+                                    <i class="fas fa-file-invoice"></i> Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h5>Chưa có thông tin lương</h5>
+                <p class="text-muted">Bạn chưa có bất kỳ bảng lương nào trong hệ thống</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Header Card */
+    .header-card {
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);
+        border: 2px solid #e6d5c3;
+    }
+    
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Summary Cards */
+    .summary-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        color: white;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .total-income {
+        background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+        border: 2px solid #81C784;
+    }
+    
+    .paid-months {
+        background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+        border: 2px solid #64B5F6;
+    }
+    
+    .total-months {
+        background: linear-gradient(135deg, #FF9800 0%, #EF6C00 100%);
+        border: 2px solid #FFB74D;
+    }
+    
+    .summary-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    
+    /* Main Card */
+    .main-card {
+        background: white;
+        border-radius: 15px;
+        border: 2px solid #e6d5c3;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .main-card .card-header {
+        background: linear-gradient(135deg, #5D4037 0%, #3E2723 100%);
+        color: white;
+        padding: 20px 30px;
+        border-bottom: 2px solid #e6d5c3;
+        font-size: 20px;
+    }
+    
+    /* Data Table */
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .data-table thead {
+        background: #FFF8F0;
+    }
+    
+    .data-table th {
+        padding: 16px;
+        font-weight: 600;
+        color: #5D4037;
+        border-bottom: 2px solid #e6d5c3;
+        text-align: left;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .data-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .data-table tbody tr:hover {
+        background: #FFF8F0;
+        transform: translateX(5px);
+    }
+    
+    .data-table td {
+        padding: 16px;
+        vertical-align: middle;
+        color: #333;
+    }
+    
+    /* Badges */
+    .month-badge {
+        background: #FFF3E0;
+        color: #EF6C00;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+        font-size: 14px;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .status-paid {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+    
+    .status-calculated {
+        background: #E3F2FD;
+        color: #1565C0;
+    }
+    
+    .status-pending {
+        background: #FFF3E0;
+        color: #EF6C00;
+    }
+    
+    .status-cancelled {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+    
+    /* Buttons */
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+    
+    .btn-info {
+        background: #E3F2FD;
+        color: #1565C0;
+        border-color: #90CAF9;
+    }
+    
+    .btn-info:hover {
+        background: #1565C0;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    /* Salary Amounts */
+    .salary-amount {
+        font-weight: 600;
+        color: #5D4037;
+    }
+    
+    .total-salary {
+        font-weight: 700;
+        color: #8B4513;
+        font-size: 16px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-icon {
+        font-size: 64px;
+        color: #a0785a;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-state h5 {
+        color: #5D4037;
+        margin-bottom: 10px;
+        font-size: 24px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-card {
+            padding: 20px;
+        }
+        
+        .header-icon {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .data-table {
+            font-size: 14px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 8px;
+        }
+        
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+{% endblock %}

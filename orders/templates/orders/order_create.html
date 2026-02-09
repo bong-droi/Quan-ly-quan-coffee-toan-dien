@@ -1,0 +1,97 @@
+<!-- orders/order_create.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tạo đơn hàng</title>
+    <style>
+        .error { color: red; }
+        .form-group { margin: 10px 0; }
+        label { display: inline-block; width: 200px; }
+    </style>
+</head>
+<body>
+    <h2>Tạo Order mới</h2>
+    
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Loại đơn:</label>
+            <select name="order_type" id="order_type" onchange="toggleFields()" required>
+                <option value="offline">Offline (tại bàn)</option>
+                <option value="online">Online (giao hàng)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Số lượng khách:</label>
+            <input type="number" name="customer_count" value="1" min="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Phương thức thanh toán:</label>
+            <select name="payment_method" required>
+                <option value="cash">Tiền mặt</option>
+                <option value="card">Thẻ</option>
+                <option value="transfer">Chuyển khoản</option>
+                <option value="momo">Momo</option>
+                <option value="zalopay">ZaloPay</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="address_row" style="display:none">
+            <label>Địa chỉ giao:</label>
+            <input type="text" name="delivery_address" />
+        </div>
+        
+        <div class="form-group" id="phone_row" style="display:none">
+            <label>Số điện thoại:</label>
+            <input type="text" name="phone_number" />
+        </div>
+        
+        <div class="form-group" id="table_row">
+            <label>Số bàn:</label>
+            <input type="text" name="table_number" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Giảm giá (VNĐ):</label>
+            <input type="number" name="discount" value="0" min="0">
+        </div>
+        
+        <div class="form-group">
+            <button type="submit">Tạo Order</button>
+            <a href="{% url 'order_list' %}">Hủy</a>
+        </div>
+    </form>
+    
+    <script>
+        function toggleFields(){
+            var type = document.getElementById('order_type').value;
+            document.getElementById('address_row').style.display = (type === 'online') ? 'block' : 'none';
+            document.getElementById('phone_row').style.display = (type === 'online') ? 'block' : 'none';
+            document.getElementById('table_row').style.display = (type === 'offline') ? 'block' : 'none';
+            
+            // Xử lý required attribute
+            var tableInput = document.querySelector('input[name="table_number"]');
+            var addressInput = document.querySelector('input[name="delivery_address"]');
+            var phoneInput = document.querySelector('input[name="phone_number"]');
+            
+            if (type === 'online') {
+                tableInput.removeAttribute('required');
+                addressInput.setAttribute('required', 'required');
+                phoneInput.setAttribute('required', 'required');
+            } else {
+                tableInput.setAttribute('required', 'required');
+                addressInput.removeAttribute('required');
+                phoneInput.removeAttribute('required');
+            }
+        }
+        toggleFields(); // Gọi lần đầu khi trang load
+    </script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="header-card mb-4">
+        <div class="d-flex align-items-center">
+            <div class="header-icon me-3">
+                <i class="fas fa-file-invoice-dollar fa-3x text-white"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 text-white">{{ title }}</h2>
+                <p class="text-white mb-0 opacity-75">{% if 'Tạo' in title %}Tạo mới{% else %}Chỉnh sửa{% endif %} bảng lương</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Form -->
+    <div class="main-card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-edit me-2"></i> Thông Tin Bảng Lương</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" id="salaryForm">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="form-group mb-4">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        <i class="fas 
+                            {% if field.name == 'employee' %}fa-user
+                            {% elif field.name == 'month' %}fa-calendar-alt
+                            {% elif field.name == 'year' %}fa-calendar
+                            {% elif 'salary' in field.name %}fa-money-bill-wave
+                            {% elif field.name == 'bonus' %}fa-gift
+                            {% elif field.name == 'deduction' %}fa-minus-circle
+                            {% elif field.name == 'status' %}fa-flag
+                            {% else %}fa-sticky-note{% endif %} me-2">
+                        </i>
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.field.widget.input_type == 'select' %}
+                    <div class="select-wrapper">
+                        {{ field }}
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                    <small class="form-help text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ field.help_text }}
+                    </small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="form-error">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        {{ field.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <!-- Salary Calculation Preview -->
+                <div class="calculation-preview mb-4">
+                    <div class="preview-header">
+                        <h5><i class="fas fa-calculator me-2"></i> Xem Trước Tính Toán</h5>
+                    </div>
+                    <div class="preview-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="preview-item">
+                                    <span class="preview-label">Lương cơ bản:</span>
+                                    <span id="previewBase" class="preview-value">0 ₫</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="preview-item">
+                                    <span class="preview-label">Thưởng:</span>
+                                    <span id="previewBonus" class="preview-value text-success">0 ₫</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="preview-item">
+                                    <span class="preview-label">Khấu trừ:</span>
+                                    <span id="previewDeduction" class="preview-value text-danger">0 ₫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-total">
+                            <span class="preview-label">Tổng lương:</span>
+                            <span id="previewTotal" class="preview-value total-amount">0 ₫</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Buttons -->
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary btn-save">
+                        <i class="fas fa-save me-2"></i> Lưu
+                    </button>
+                    <a href="{% url 'salary_list' %}" class="btn btn-secondary btn-cancel">
+                        <i class="fas fa-times me-2"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Header Card */
+    .header-card {
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);
+        border: 2px solid #e6d5c3;
+    }
+    
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Main Card */
+    .main-card {
+        background: white;
+        border-radius: 15px;
+        border: 2px solid #e6d5c3;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .main-card .card-header {
+        background: linear-gradient(135deg, #5D4037 0%, #3E2723 100%);
+        color: white;
+        padding: 20px 30px;
+        border-bottom: 2px solid #e6d5c3;
+        font-size: 18px;
+    }
+    
+    .card-body {
+        padding: 30px;
+    }
+    
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #5D4037;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-control, .form-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #d4a76a;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #5c3d2e;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #8B4513;
+        box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.2);
+    }
+    
+    .select-wrapper {
+        position: relative;
+    }
+    
+    .select-wrapper::after {
+        content: '▼';
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8B4513;
+        font-size: 12px;
+        pointer-events: none;
+    }
+    
+    .form-select {
+        appearance: none;
+        padding-right: 40px;
+    }
+    
+    .form-help {
+        display: block;
+        margin-top: 8px;
+        font-size: 13px;
+    }
+    
+    .form-error {
+        color: #f44336;
+        font-size: 14px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: #FFEBEE;
+        border-radius: 6px;
+        border-left: 4px solid #f44336;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Calculation Preview */
+    .calculation-preview {
+        background: #FFF8F0;
+        border-radius: 10px;
+        border: 2px solid #e6d5c3;
+        overflow: hidden;
+    }
+    
+    .preview-header {
+        background: #5D4037;
+        color: white;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .preview-body {
+        padding: 20px;
+    }
+    
+    .preview-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0e6d6;
+    }
+    
+    .preview-item:last-child {
+        border-bottom: none;
+    }
+    
+    .preview-label {
+        color: #5D4037;
+        font-weight: 500;
+    }
+    
+    .preview-value {
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    .preview-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0 5px;
+        margin-top: 10px;
+        border-top: 2px solid #e6d5c3;
+    }
+    
+    .total-amount {
+        color: #8B4513;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    
+    /* Buttons */
+    .form-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0e6d6;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-decoration: none;
+        flex: 1;
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        color: white;
+        border-color: #8B4513;
+    }
+    
+    .btn-save:hover {
+        background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+    }
+    
+    .btn-cancel {
+        background: linear-gradient(135deg, #a0785a 0%, #8a6548 100%);
+        color: white;
+        border-color: #a0785a;
+    }
+    
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #8a6548 0%, #a0785a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(160, 120, 90, 0.3);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-card {
+            padding: 20px;
+        }
+        
+        .header-icon {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .form-buttons {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .preview-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .preview-total {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get form fields
+        const baseSalaryField = document.getElementById('id_base_salary');
+        const bonusField = document.getElementById('id_bonus');
+        const deductionField = document.getElementById('id_deduction');
+        
+        // Preview elements
+        const previewBase = document.getElementById('previewBase');
+        const previewBonus = document.getElementById('previewBonus');
+        const previewDeduction = document.getElementById('previewDeduction');
+        const previewTotal = document.getElementById('previewTotal');
+        
+        // Function to format number with commas
+        function formatNumber(num) {
+            return Number(num).toLocaleString('vi-VN');
+        }
+        
+        // Function to calculate and update preview
+        function updatePreview() {
+            const base = parseFloat(baseSalaryField?.value || 0);
+            const bonus = parseFloat(bonusField?.value || 0);
+            const deduction = parseFloat(deductionField?.value || 0);
+            const total = base + bonus - deduction;
+            
+            // Update preview values
+            previewBase.textContent = `${formatNumber(base)} ₫`;
+            previewBonus.textContent = `+${formatNumber(bonus)} ₫`;
+            previewDeduction.textContent = `-${formatNumber(deduction)} ₫`;
+            previewTotal.textContent = `${formatNumber(total)} ₫`;
+        }
+        
+        // Add event listeners to form fields
+        if (baseSalaryField) baseSalaryField.addEventListener('input', updatePreview);
+        if (bonusField) bonusField.addEventListener('input', updatePreview);
+        if (deductionField) deductionField.addEventListener('input', updatePreview);
+        
+        // Initial update
+        updatePreview();
+        
+        // Form validation
+        const form = document.getElementById('salaryForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const monthField = document.getElementById('id_month');
+                const yearField = document.getElementById('id_year');
+                
+                if (monthField && yearField) {
+                    const month = parseInt(monthField.value);
+                    const year = parseInt(yearField.value);
+                    
+                    if (month < 1 || month > 12) {
+                        e.preventDefault();
+                        alert('Tháng phải từ 1 đến 12');
+                        return false;
+                    }
+                    
+                    const currentYear = new Date().getFullYear();
+                    if (year < 2020 || year > currentYear + 10) {
+                        e.preventDefault();
+                        alert(`Năm phải từ 2020 đến ${currentYear + 10}`);
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}

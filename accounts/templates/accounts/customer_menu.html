@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Menu | Khách hàng</title>
+  <style>
+    .menu-container {
+      padding: 20px;
+      background: #f8f6f2;
+      min-height: 100vh;
+    }
+    
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .menu-item {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    
+    .menu-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .menu-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .menu-content {
+      padding: 15px;
+    }
+    
+    .menu-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #2a160f;
+    }
+    
+    .menu-category {
+      font-size: 14px;
+      color: #8a7468;
+      margin-bottom: 10px;
+    }
+    
+    .menu-price {
+      font-size: 16px;
+      font-weight: 600;
+      color: #b96b33;
+    }
+    
+    .menu-description {
+      font-size: 14px;
+      color: #6b4f3f;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    
+    .no-items {
+      text-align: center;
+      padding: 40px;
+      color: #8a7468;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="menu-container">
+    <h1 style="color: #2a160f; padding: 0 20px;">Thực đơn của chúng tôi</h1>
+    <p style="color: #6b4f3f; padding: 0 20px 20px;">Chọn món yêu thích và đặt hàng ngay</p>
+    
+    <div class="menu-grid">
+      {% for item in items %}
+      <div class="menu-item">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-image">
+        {% else %}
+          <div style="width:100%;height:200px;background:#f0eee9;display:flex;align-items:center;justify-content:center;color:#8a7468;">
+            <span>☕</span>
+          </div>
+        {% endif %}
+        <div class="menu-content">
+          <div class="menu-title">{{ item.name }}</div>
+          <div class="menu-category">
+            {% if item.category %}{{ item.category.name }}{% else %}Không phân loại{% endif %}
+          </div>
+          <div class="menu-price">{{ item.price|floatformat:0 }}đ</div>
+          {% if item.description %}
+            <div class="menu-description">{{ item.description }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="no-items">Chưa có món nào trong thực đơn.</div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

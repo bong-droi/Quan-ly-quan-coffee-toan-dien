@@ -1,0 +1,442 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <title>Chỉ ca đã đăng ký</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body.page {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: min(900px, 95vw);
+            margin: 0 auto;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            color: #8B4513;
+        }
+        
+        .brand-text h1 {
+            color: #5D4037;
+            font-size: 28px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brand-text p {
+            color: #795548;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: #f5f5f5;
+            border-radius: 10px 10px 0 0;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: #e0e0e0;
+        }
+        
+        .tab.active {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #8B4513;
+            color: white;
+            border: 2px solid #8B4513;
+        }
+        
+        .btn-primary:hover {
+            background: #A0522D;
+            border-color: #A0522D;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6D4C41;
+            color: white;
+            border: 2px solid #6D4C41;
+        }
+        
+        .btn-secondary:hover {
+            background: #5D4037;
+            border-color: #5D4037;
+            transform: translateY(-2px);
+        }
+        
+        /* Table styles - giống shifts_list.html */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #E0E0E0;
+            margin-top: 20px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 700px;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        }
+        
+        .table th {
+            padding: 16px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        .table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s;
+            border-bottom: 1px solid #F0F0F0;
+        }
+        
+        .table tbody tr:hover {
+            background: #FFF8F0;
+        }
+        
+        .table td {
+            padding: 16px;
+            vertical-align: middle;
+            color: #333;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #FFF3E0;
+            color: #EF6C00;
+        }
+        
+        .status-assigned {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .status-past {
+            background: #F5F5F5;
+            color: #616161;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        
+        .action-cancel {
+            background: #FFEBEE;
+            color: #C62828;
+            border-color: #FFCDD2;
+        }
+        
+        .action-cancel:hover {
+            background: #C62828;
+            color: white;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #757575;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #5D4037;
+        }
+        
+        /* Calendar view */
+        .calendar-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .day-header {
+            font-weight: bold;
+            color: #5D4037;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .shift-item {
+            background: #FFF8F0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #8B4513;
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="page">
+    <div class="card">
+        <div class="tabs">
+            <a href="{% url 'shifts:shift_register' %}" class="tab">
+                📝 Đăng ký ca mới
+            </a>
+            <a href="{% url 'shifts:my_registrations' %}" class="tab active">
+                📋 Chỉ ca đã đăng ký
+            </a>
+            <a href="{% url 'shifts:my_shifts' %}" class="tab">
+                🗓️ Tất cả ca
+            </a>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages" style="margin-bottom: 20px;">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}" style="padding: 12px; border-radius: 8px; margin-bottom: 10px; 
+                {% if message.tags == 'success' %}background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9;{% endif %}
+                {% if message.tags == 'error' %}background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2;{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Danh sách ca đã đăng ký -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #5D4037;">📅 Danh sách ca đã đăng ký</h3>
+                <div style="color: #666;">
+                    <strong>Tổng: {{ registrations|length }} ca</strong>
+                </div>
+            </div>
+            
+            {% if registrations %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tên ca</th>
+                            <th>Thời gian</th>
+                            <th>Ngày</th>
+                            <th>Số giờ</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registrations %}
+                        <tr>
+                            <td><strong>{{ reg.shift.name }}</strong></td>
+                            <td>{{ reg.shift.start_time|time:"H:i" }} - {{ reg.shift.end_time|time:"H:i" }}</td>
+                            <td>{{ reg.date|date:"d/m/Y" }}</td>
+                            <td>{{ reg.shift.get_duration_hours }} giờ</td>
+                            <td>
+                                {% if reg.is_assigned %}
+                                <span class="status-badge status-assigned">Đã phân công</span>
+                                {% elif reg.date < today %}
+                                <span class="status-badge status-past">Đã qua</span>
+                                {% else %}
+                                <span class="status-badge status-pending">Chờ phân công</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not reg.is_assigned and reg.date > today %}
+                                <form method="post" action="{% url 'shifts:shift_unregister' reg.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn action-cancel"
+                                            onclick="return confirm('Bạn có chắc muốn hủy đăng ký ca {{ reg.shift.name }} ngày {{ reg.date|date:"d/m/Y" }}?')">
+                                        ❌ Hủy
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span style="color: #999; font-size: 14px;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Thống kê -->
+            <div style="margin-top: 20px; padding: 15px; background: #F9F9F9; border-radius: 10px;">
+                <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #8B4513; font-weight: bold;">{{ registrations|length }}</div>
+                        <div style="color: #666; font-size: 14px;">Tổng ca đăng ký</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #2E7D32; font-weight: bold;">
+                            {% with assigned_count=0 %}
+                                {% for reg in registrations %}
+                                    {% if reg.is_assigned %}
+                                        {% with assigned_count=assigned_count|add:1 %}
+                                        {% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ assigned_count }}
+                            {% endwith %}
+                        </div>
+                        <div style="color: #666; font-size: 14px;">Đã phân công</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #EF6C00; font-weight: bold;">
+                            {% with pending_count=0 %}
+                                {% for reg in registrations %}
+                                    {% if not reg.is_assigned and reg.date >= today %}
+                                        {% with pending_count=pending_count|add:1 %}
+                                        {% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ pending_count }}
+                            {% endwith %}
+                        </div>
+                        <div style="color: #666; font-size: 14px;">Chờ phân công</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <h3>Chưa có ca đăng ký</h3>
+                <p>Bạn chưa đăng ký ca làm việc nào</p>
+
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Nút quay lại -->
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="{% url 'shifts:shift_register' %}" class="btn btn-primary" style="margin-left: 10px;">
+                📝 Đăng ký ca mới
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Thêm hiệu ứng cho các hàng trong bảng
+            const rows = document.querySelectorAll('.table tbody tr');
+            rows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.05}s`;
+            });
+        });
+    </script>
+</body>
+</html>

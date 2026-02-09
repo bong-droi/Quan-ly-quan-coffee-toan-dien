@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Header | Khách hàng</title>
+  <base target="main">
+  <link rel="stylesheet" href="{% static 'accounts/css/header.css' %}">
+  <script>
+    // Script để highlight nav link đang active
+    document.addEventListener('DOMContentLoaded', function() {
+      // Lấy URL hiện tại trong frame main
+      const currentFrame = window.parent.frames['main'];
+      if (currentFrame && currentFrame.location.href) {
+        const currentUrl = currentFrame.location.href;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+          // So sánh pathname (bỏ qua domain)
+          const linkPath = new URL(link.href).pathname;
+          const currentPath = new URL(currentUrl).pathname;
+          
+          if (currentPath.includes(linkPath) || 
+              (linkPath.includes('customer_order_ui') && currentPath.includes('customer_order_ui')) ||
+              (linkPath.includes('customer_menu') && currentPath.includes('customer_menu')) ||
+              (linkPath.includes('password_change') && currentPath.includes('password_change'))) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand brand-link" href="{% url 'customer_menu' %}">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M10 22h36v10a14 14 0 0 1-14 14H24A14 14 0 0 1 10 32V22z" fill="currentColor"/>
+        <path d="M46 26h4a6 6 0 0 1 0 12h-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        <path d="M22 10c0 4 6 4 6 8s-6 4-6 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M34 10c0 4 6 4 6 8s-6 4-6 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Coffee Cat - Khách hàng</h1>
+        <p>Xin chào, {{ request.user.username }}</p>
+      </div>
+    </a>
+
+    <nav class="nav">
+      <a class="nav-link" href="{% url 'customer_menu' %}">Menu</a>
+      <a class="nav-link" href="{% url 'customer_order_ui' %}">Đặt món</a>
+      <a class="nav-link" href="{% url 'password_change' %}">Đổi mật khẩu</a>
+    </nav>
+
+    <a class="logout" href="{% url 'logout' %}" target="_top">Đăng xuất</a>
+  </header>
+</body>
+</html>

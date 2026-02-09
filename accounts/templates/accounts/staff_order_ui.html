@@ -1,0 +1,509 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Quản lý đơn hàng | Nhân viên</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f8f6f2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    .grid { 
+      display: grid; 
+      grid-template-columns: 1.2fr 0.8fr; 
+      gap: 16px; 
+      padding: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 968px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    
+    .card { 
+      background: #fff; 
+      border: 1px solid #f0eee9; 
+      border-radius: 12px; 
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+    
+    .card h3 { 
+      margin: 0 0 12px; 
+      font-size: 18px;
+      color: #2a160f;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0eee9;
+    }
+    
+    .toolbar { 
+      display: flex; 
+      gap: 8px; 
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .toolbar button { 
+      padding: 8px 14px; 
+      border-radius: 8px; 
+      border: 1px solid #e6e2dc; 
+      background: #fff7ee; 
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .2s;
+    }
+    
+    .toolbar button:hover {
+      background: #ffe9cc;
+      transform: translateY(-1px);
+    }
+    
+    .table { 
+      width: 100%; 
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    .table th, .table td { 
+      border: 1px solid #f0eee9; 
+      padding: 10px; 
+      text-align: left;
+    }
+    
+    .table th {
+      background: #faf8f5;
+      font-weight: 600;
+      color: #2a160f;
+      position: sticky;
+      top: 0;
+    }
+    
+    .table tbody tr {
+      transition: background .2s;
+    }
+    
+    .table tbody tr:hover {
+      background: #faf8f5;
+    }
+    
+    .muted { 
+      color: #8a7468;
+      font-style: italic;
+    }
+    
+    .actions { 
+      display: flex; 
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #e6e2dc;
+      background: #2a160f;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .2s;
+    }
+    
+    .btn:hover {
+      background: #3a261f;
+      transform: translateY(-1px);
+    }
+    
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    
+    .badge { 
+      display: inline-block; 
+      padding: 4px 10px; 
+      border-radius: 999px; 
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    
+    .badge.processing { 
+      background: #fff3cd; 
+      color: #856404; 
+      border-color: #ffeaa7;
+    }
+    
+    .badge.processed { 
+      background: #d4edda; 
+      color: #155724; 
+      border-color: #a3e4a3;
+    }
+    
+    .badge.canceled { 
+      background: #f8d7da; 
+      color: #721c24; 
+      border-color: #f5c6cb;
+    }
+    
+    .link-detail {
+      color: #b96b33;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    
+    .link-detail:hover {
+      color: #8a4e24;
+      text-decoration: underline;
+    }
+    
+    .detail-meta {
+      background: #faf8f5;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #6b4f3f;
+    }
+    
+    .detail-meta strong {
+      color: #2a160f;
+    }
+    
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #8a7468;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #8a7468;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <!-- CỘT DANH SÁCH ĐƠN HÀNG -->
+    <div class="card">
+      <h3>📋 Đơn đặt hàng</h3>
+      <div class="toolbar">
+        <button type="button" onclick="loadOrders()">🔄 Làm mới</button>
+        <button type="button" onclick="filterByStatus('all')">Tất cả</button>
+        <button type="button" onclick="filterByStatus('processing')">Đang xử lý</button>
+        <button type="button" onclick="filterByStatus('processed')">Đã xử lý</button>
+        <button type="button" onclick="filterByStatus('canceled')">Đã hủy</button>
+      </div>
+      
+      <div style="overflow-x: auto;">
+        <table class="table" id="ordersTable">
+          <thead>
+            <tr>
+              <th style="width:60px">#</th>
+              <th>Loại</th>
+              <th>Địa chỉ/Bàn</th>
+              <th>SĐT</th>
+              <th>Trạng thái</th>
+              <th style="width:100px" class="text-right">Tổng tiền</th>
+              <th style="width:100px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="7" class="loading">⏳ Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CỘT NHẬN ĐƠN -->
+    <div class="card">
+      <h3>🍽 Chi tiết đơn hàng</h3>
+      <div class="muted" id="detailHint">Chọn một đơn ở bảng bên trái để xem chi tiết</div>
+      
+      <div id="detailBox" style="display:none">
+        <div id="detailMeta" class="detail-meta"></div>
+        
+        <div style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Món</th>
+                <th style="width:60px" class="text-center">SL</th>
+                <th style="width:100px" class="text-right">Đơn giá</th>
+                <th style="width:100px" class="text-right">Thành tiền</th>
+                <th style="width:80px" class="text-center">Xử lý</th>
+              </tr>
+            </thead>
+            <tbody id="detailItems">
+              <tr><td colspan="5" class="muted text-center">Chưa có món.</td></tr>
+            </tbody>
+            <tfoot>
+              <tr style="font-weight:600;background:#faf8f5">
+                <td colspan="3" class="text-right">Tổng cộng:</td>
+                <td class="text-right" id="detailTotal">0đ</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
+        <div style="margin-top:12px" class="actions">
+          <button type="button" id="btnComplete" class="btn">✅ Hoàn thành đơn</button>
+          <button type="button" id="btnRefresh" class="btn" style="background:#6b7280" onclick="loadOrders()">🔄 Làm mới</button>
+        </div>
+        
+        <div id="cancelReason" class="muted" style="margin-top:10px;display:none;font-size:13px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var allOrders = [];
+    var currentFilter = 'all';
+
+    function money(n) {
+      return new Intl.NumberFormat('vi-VN').format(n) + 'đ';
+    }
+
+    function getStatusBadge(status) {
+      if (status === 'processing') return '<span class="badge processing">⏳ Đang xử lý</span>';
+      if (status === 'processed') return '<span class="badge processed">✅ Đã xử lý</span>';
+      if (status === 'canceled') return '<span class="badge canceled">❌ Đã hủy</span>';
+      return '<span class="badge">' + status + '</span>';
+    }
+
+    function filterByStatus(status) {
+      currentFilter = status;
+      renderOrders(allOrders);
+    }
+
+    function renderOrders(rows) {
+      var body = document.getElementById('ordersBody');
+      
+      if (!rows || rows.length === 0) { 
+        body.innerHTML = '<tr><td colspan="7" class="empty-state">Chưa có đơn hàng nào</td></tr>'; 
+        return; 
+      }
+
+      // Lọc theo status
+      var filtered = rows;
+      if (currentFilter !== 'all') {
+        filtered = rows.filter(o => o.status === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" class="empty-state">Không có đơn hàng nào</td></tr>';
+        return;
+      }
+
+      var html = '';
+      filtered.forEach(function(o) {
+        var isOnline = (o.order_type === 'online');
+        var addr = isOnline ? (o.delivery_address || '-') : (o.table_number || '-');
+        var phone = isOnline ? (o.phone_number || '-') : '-';
+        var isDone = (o.status === 'processed');
+        var isCanceled = (o.status === 'canceled');
+
+        html += '<tr data-id="' + o.id + '" style="' + (isCanceled ? 'opacity:.6;' : '') + '">' +
+          '<td><strong>#' + o.id + '</strong></td>' +
+          '<td>' + (isOnline ? '🛵 Online' : '🏪 Tại quán') + '</td>' +
+          '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + addr + '">' + addr + '</td>' +
+          '<td>' + phone + '</td>' +
+          '<td class="status-cell">' + getStatusBadge(o.status) + '</td>' +
+          '<td class="text-right"><strong>' + money(o.total || 0) + '</strong></td>' +
+          '<td><a href="#" data-id="' + o.id + '" class="link-detail">' + 
+            (isCanceled ? '👁 Xem' : (isDone ? '👁 Xem' : '📝 Nhận đơn')) + 
+          '</a></td>' +
+        '</tr>';
+      });
+      
+      body.innerHTML = html;
+    }
+
+    function loadOrders() {
+      var body = document.getElementById('ordersBody');
+      body.innerHTML = '<tr><td colspan="7" class="loading">⏳ Đang tải...</td></tr>';
+
+      fetch('/orders/api/list/')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res && res.ok) { 
+            allOrders = res.orders || [];
+            renderOrders(allOrders); 
+          } else { 
+            body.innerHTML = '<tr><td colspan="7" class="empty-state">❌ Không tải được dữ liệu</td></tr>';
+          }
+        })
+        .catch(function(e) { 
+          console.error(e);
+          body.innerHTML = '<tr><td colspan="7" class="empty-state">❌ Lỗi kết nối</td></tr>';
+        });
+    }
+
+    // Load orders khi trang load
+    loadOrders();
+    
+    // Auto refresh mỗi 30s
+    setInterval(loadOrders, 30000);
+
+    // Xử lý click vào link chi tiết
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('link-detail')) {
+        e.preventDefault();
+        var id = e.target.getAttribute('data-id');
+        loadOrderDetail(id);
+      }
+    });
+
+    function loadOrderDetail(id) {
+      var detailBox = document.getElementById('detailBox');
+      var detailHint = document.getElementById('detailHint');
+      
+      detailBox.style.display = 'block';
+      detailHint.style.display = 'none';
+      
+      fetch('/orders/api/' + id + '/')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (!(res && res.ok)) {
+            alert('Không tải được chi tiết đơn hàng');
+            return;
+          }
+
+          var o = res.order;
+          var isDone = (o.status === 'processed');
+          var isCanceled = (o.status === 'canceled');
+          var isOnline = (o.order_type === 'online');
+          
+          // Hiển thị thông tin đơn hàng
+          var addr = isOnline ? (o.delivery_address || '-') : (o.table_number || '-');
+          var phone = isOnline ? (o.phone_number || '-') : '';
+          
+          var meta = '<strong>Đơn #' + o.id + '</strong> - ' + 
+                     (isOnline ? '🛵 Online' : '🏪 Tại quán') + ' - ' + 
+                     '📍 ' + addr;
+          
+          if (isOnline && phone) {
+            meta += ' | 📱 ' + phone;
+          }
+          
+          meta += '<br>Trạng thái: ' + getStatusBadge(o.status) + 
+                  ' | ⏰ Đặt lúc: ' + o.created_at;
+          
+          if (isDone && o.completed_at) {
+            meta += ' | ✅ Hoàn thành: ' + o.completed_at;
+          }
+          
+          if (isCanceled && o.canceled_at) {
+            meta += ' | ❌ Hủy lúc: ' + o.canceled_at;
+          }
+          
+          document.getElementById('detailMeta').innerHTML = meta;
+
+          // Hiển thị danh sách món
+          var itemsHtml = '';
+          var total = 0;
+
+          (o.items || []).forEach(function(i, idx) {
+            var qty = i.qty || i.quantity || 1;
+            var price = parseFloat(i.price) || 0;
+            var line = parseFloat(i.line);
+
+            if (isNaN(line)) {
+              line = price * qty;
+            }
+
+            total += line;
+
+            var checkboxCell = (isDone || isCanceled)
+              ? '✅'
+              : '<input type="checkbox" class="done-item" data-index="' + idx + '">';
+
+            itemsHtml +=
+              '<tr>' +
+                '<td><strong>' + i.name + '</strong></td>' +
+                '<td class="text-center">' + qty + '</td>' +
+                '<td class="text-right">' + money(price) + '</td>' +
+                '<td class="text-right"><strong>' + money(line) + '</strong></td>' +
+                '<td class="text-center">' + checkboxCell + '</td>' +
+              '</tr>';
+          });
+
+          document.getElementById('detailItems').innerHTML =
+            itemsHtml || '<tr><td colspan="5" class="muted text-center">Chưa có món.</td></tr>';
+
+          document.getElementById('detailTotal').innerText = money(total);
+
+          // Xử lý nút hoàn thành
+          var completeBtn = document.getElementById('btnComplete');
+          completeBtn.style.display = (isDone || isCanceled) ? 'none' : 'inline-block';
+          completeBtn.onclick = function() {
+            completeOrder(id);
+          };
+
+          // Hiển thị lý do hủy nếu có
+          var reasonEl = document.getElementById('cancelReason');
+          if (isCanceled && o.cancel_reason) {
+            reasonEl.innerHTML = '<strong>Lý do hủy:</strong> ' + o.cancel_reason;
+            reasonEl.style.display = 'block';
+          } else {
+            reasonEl.style.display = 'none';
+          }
+        })
+        .catch(function(e) {
+          console.error(e);
+          alert('Lỗi khi tải chi tiết đơn hàng');
+        });
+    }
+
+    function completeOrder(orderId) {
+      // Kiểm tra xem tất cả món đã được check chưa
+      var boxes = document.querySelectorAll('#detailItems .done-item');
+      for (var i = 0; i < boxes.length; i++) {
+        if (!boxes[i].checked) {
+          alert('⚠ Còn món chưa xử lý!\n\nVui lòng đánh dấu tất cả món đã hoàn thành trước khi hoàn tất đơn hàng.');
+          return;
+        }
+      }
+
+      if (!confirm('✅ Xác nhận hoàn thành đơn hàng #' + orderId + '?')) {
+        return;
+      }
+
+      var csrfToken = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1];
+      
+      fetch('/orders/api/' + orderId + '/complete/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res && res.ok) {
+          alert('✅ Đơn hàng đã được hoàn thành!');
+          loadOrders();
+          loadOrderDetail(orderId);
+        } else {
+          alert('❌ Không thể hoàn thành đơn: ' + (res.error || 'Lỗi không xác định'));
+        }
+      })
+      .catch(function(e) {
+        console.error(e);
+        alert('❌ Lỗi kết nối khi hoàn thành đơn');
+      });
+    }
+  </script>
+</body>
+</html>

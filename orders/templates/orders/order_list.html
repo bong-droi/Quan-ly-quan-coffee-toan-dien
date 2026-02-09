@@ -1,0 +1,25 @@
+<h2>Danh sách Order</h2>
+<a href="{% url 'order_create' %}">+ Tạo Order mới</a>
+{% if db_error %}
+  <p style="color:#b91c1c">Không truy cập được cơ sở dữ liệu: {{ db_error }}</p>
+{% endif %}
+<ul>
+  {% for o in orders %}
+    <li>
+      <a href="{% url 'order_detail' o.id %}">Order #{{ o.id }}</a>
+      - {{ o.staff.username }} - {{ o.created_at }} - Tổng: {{ o.total_price }}
+      - Loại: {{ o.get_order_type_display }}
+      {% if o.order_type == 'online' %}
+        - Địa chỉ: {{ o.delivery_address|default:'-' }}
+      {% else %}
+        - Bàn: {{ o.table_number|default:'-' }}
+      {% endif %}
+      - Trạng thái: {{ o.get_status_display }}
+      <a href="{% url 'order_delete' o.id %}">Xóa</a>
+    </li>
+  {% empty %}
+    <li>Chưa có đơn nào.</li>
+  {% endfor %}
+</ul>
+
+

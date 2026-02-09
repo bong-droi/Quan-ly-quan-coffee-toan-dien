@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
+  "http://www.w3.org/TR/html4/frameset.dtd">
+<html lang="vi">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Khách hàng - Coffee Cat</title>
+  <style>
+    /* Đảm bảo frame không có viền */
+    frame { border: none; }
+  </style>
+</head>
+
+<!-- Hàng 1: header (130px). Hàng 2: nội dung (phần còn lại) -->
+<frameset rows="100,*" frameborder="0" border="0" framespacing="0">
+  <frame name="header" src="{% url 'customer_header' %}" noresize scrolling="no">
+  <frame name="main" src="{% url 'customer_menu' %}"
+         frameborder="0" marginwidth="0" marginheight="0" scrolling="yes">
+</frameset>
+</html>

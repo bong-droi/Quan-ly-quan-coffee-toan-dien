@@ -1,0 +1,230 @@
+{% extends 'reports/base_reports.html' %}
+{% load humanize %}
+
+{% block page_title %}Báo cáo Doanh thu & Bill{% endblock %}
+
+{% block report_content %}
+<!-- Form chọn thời gian -->
+<div class="stat-card mb-4">
+    <h5 class="mb-3" style="color: var(--coffee-brown);">
+        <i class="bi bi-filter"></i> Lọc thời gian
+    </h5>
+    <form method="get" action="{% url 'reports:revenue_report' %}">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" style="color: var(--coffee-text); font-weight: 600;">Từ ngày</label>
+                <input type="date" class="form-control" name="start_date" 
+                       value="{{ start_date|date:'Y-m-d' }}" style="border-color: var(--coffee-border); border-radius: 10px;">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="color: var(--coffee-text); font-weight: 600;">Đến ngày</label>
+                <input type="date" class="form-control" name="end_date"
+                       value="{{ end_date|date:'Y-m-d' }}" style="border-color: var(--coffee-border); border-radius: 10px;">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Lọc
+                </button>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <a href="{% url 'reports:revenue_report' %}" class="btn btn-outline-secondary w-100" style="border-color: var(--coffee-muted); color: var(--coffee-muted);">
+                    <i class="bi bi-arrow-clockwise"></i> Hôm nay
+                </a>
+            </div>
+        </div>
+        <div class="mt-3 text-center">
+            <span class="badge" style="background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%); color: var(--coffee-brown); border: 1px solid var(--coffee-border); padding: 8px 16px; font-size: 14px;">
+                <i class="bi bi-calendar-week"></i> {{ date_range }}
+            </span>
+        </div>
+    </form>
+</div>
+
+<!-- Tổng quan -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card text-center" style="border-color: var(--coffee-brown); background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: var(--coffee-brown);">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <h6 class="text-muted mb-2">TỔNG DOANH THU</h6>
+            <h3 style="color: var(--coffee-brown);">{{ total_revenue|intcomma }} ₫</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card text-center" style="border-color: #4CAF50; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: #2e7d32;">
+                <i class="bi bi-receipt-cutoff"></i>
+            </div>
+            <h6 class="text-muted mb-2">TỔNG BILL</h6>
+            <h3 style="color: #2e7d32;">{{ total_bills }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card text-center" style="border-color: #2196F3; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: #1565c0;">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <h6 class="text-muted mb-2">TRUNG BÌNH/Bill</h6>
+            <h3 style="color: #1565c0;">
+                {% if total_bills > 0 %}
+                    {{ average_bill|floatformat:0|intcomma }} ₫
+                {% else %}
+                    0 ₫
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<!-- Thống kê theo loại -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="stat-card" style="border-color: #4CAF50; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">
+                        <i class="bi bi-shop"></i> Tại quán (Offline)
+                    </h6>
+                    <h4 style="color: #2e7d32;">{{ cash_amount|intcomma }} ₫</h4>
+                </div>
+                <div style="font-size: 3rem; color: #2e7d32;">
+                    <i class="bi bi-shop-window"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="stat-card" style="border-color: #2196F3; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">
+                        <i class="bi bi-phone"></i> Online
+                    </h6>
+                    <h4 style="color: #1565c0;">{{ card_amount|intcomma }} ₫</h4>
+                </div>
+                <div style="font-size: 3rem; color: #1565c0;">
+                    <i class="bi bi-phone-vibrate"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Danh sách bill -->
+<div class="stat-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 style="color: var(--coffee-brown); margin: 0;">
+            <i class="bi bi-list-ul"></i> Danh sách Bill ({{ total_bills }})
+        </h5>
+        <button onclick="window.print()" class="btn btn-outline-primary">
+            <i class="bi bi-printer"></i> In báo cáo
+        </button>
+    </div>
+    
+    {% if bills %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead style="background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%);">
+                <tr>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">Mã Bill</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">Thời gian</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">Bàn</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">Số món</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">NV phục vụ</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);">Loại</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);" class="text-end">Tổng tiền</th>
+                    <th style="color: var(--coffee-text); border-color: var(--coffee-border);" class="text-center">Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--coffee-brown);">{{ bill.bill_id }}</strong>
+                    </td>
+                    <td>{{ bill.formatted_created_at }}</td>
+                    <td>
+                        {% if bill.table_number != '-' %}
+                            <span class="badge" style="background: #fff8f0; color: var(--coffee-brown); border: 1px solid var(--coffee-border);">
+                                <i class="bi bi-table"></i> {{ bill.table_number }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge" style="background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb;">
+                            <i class="bi bi-cup-straw"></i> {{ bill.customer_count }}
+                        </span>
+                    </td>
+                    <td>{{ bill.staff_name|default:"-" }}</td>
+                    <td>
+                        {% if bill.payment_method == 'offline' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); color: #2e7d32; border: 1px solid #c8e6c9;">
+                                <i class="bi bi-shop"></i> Tại quán
+                            </span>
+                        {% elif bill.payment_method == 'online' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); color: #1565c0; border: 1px solid #bbdefb;">
+                                <i class="bi bi-phone"></i> Online
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ bill.payment_method }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <strong style="color: var(--coffee-brown);">{{ bill.final_amount|intcomma }} ₫</strong>
+                    </td>
+                    <td class="text-center">
+                        <a href="{% url 'reports:bill_detail' bill.bill_id %}" 
+                           class="btn btn-sm btn-outline-primary"
+                           target="_blank"
+                           title="Xem chi tiết"
+                           style="border-color: var(--coffee-brown); color: var(--coffee-brown);">
+                            <i class="bi bi-eye"></i> Xem
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot style="background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%);">
+                <tr>
+                    <td colspan="6" class="text-end" style="font-weight: 700; color: var(--coffee-text);">Tổng cộng:</td>
+                    <td class="text-end" style="font-weight: 700; color: var(--coffee-brown);">{{ total_revenue|intcomma }} ₫</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div style="font-size: 4rem; color: var(--coffee-muted); opacity: 0.5; margin-bottom: 20px;">
+            <i class="bi bi-receipt"></i>
+        </div>
+        <h5 style="color: var(--coffee-muted);">Không có hóa đơn nào</h5>
+        <p class="text-muted">Thử chọn khoảng thời gian khác hoặc tạo đơn hàng mới</p>
+        <a href="{% url 'order_create' %}" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-circle"></i> Tạo đơn hàng
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+@media print {
+    .btn, .form-control, .form-label, form, .header {
+        display: none !important;
+    }
+    .stat-card {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+}
+</style>
+{% endblock %}

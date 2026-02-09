@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Header | Nhân viên</title>
+  <base target="main">
+  <link rel="stylesheet" href="{% static 'accounts/css/header.css' %}">
+  <script>
+    // Script để highlight nav link đang active
+    document.addEventListener('DOMContentLoaded', function() {
+      // Lấy URL hiện tại trong frame main
+      const currentFrame = window.parent.frames['main'];
+      if (currentFrame && currentFrame.location.href) {
+        const currentUrl = currentFrame.location.href;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+          // So sánh pathname (bỏ qua domain)
+          const linkPath = new URL(link.href).pathname;
+          const currentPath = new URL(currentUrl).pathname;
+          
+          if (currentPath.includes(linkPath) || 
+              (linkPath.includes('staff_order_ui') && currentPath.includes('staff_order_ui')) ||
+              (linkPath.includes('staff_order_tai_quay') && currentPath.includes('staff_order_tai_quay'))) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand brand-link" href="{% url 'staff_order_ui' %}">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M10 22h36v10a14 14 0 0 1-14 14H24A14 14 0 0 1 10 32V22z" fill="currentColor"/>
+        <path d="M46 26h4a6 6 0 0 1 0 12h-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        <path d="M22 10c0 4 6 4 6 8s-6 4-6 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M34 10c0 4 6 4 6 8s-6 4-6 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Coffee Cat - Nhân viên</h1>
+        <p>Xin chào, {{ request.user.username }}</p>
+      </div>
+    </a>
+
+    <nav class="nav">
+      <a class="nav-link" href="{% url 'staff_order_ui' %}">Đơn hàng</a>
+      <a class="nav-link" href="{% url 'staff_order_tai_quay' %}">Order tại quầy</a>
+      <a class="nav-link" href="{% url 'shifts:shift_register' %}">Đăng ký ca</a>
+      <a class="nav-link" href="{% url 'shifts:my_shifts' %}">Ca của tôi</a>
+    </nav>
+
+    <a class="logout" href="{% url 'logout' %}" target="_top">Đăng xuất</a>
+  </header>
+</body>
+</html>

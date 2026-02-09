@@ -1,0 +1,88 @@
+{% extends 'reports/base_reports.html' %}
+{% load humanize %}
+
+{% block page_title %}Dashboard Doanh thu{% endblock %}
+
+{% block report_content %}
+<!-- Form chọn thời gian -->
+<div class="stat-card mb-4">
+    <h5 class="mb-3" style="color: var(--coffee-brown);">
+        <i class="bi bi-calendar-range"></i> Chọn khoảng thời gian
+    </h5>
+    <form method="get" action="{% url 'reports:revenue_report' %}" class="row g-3">
+        <div class="col-md-4">
+            <input type="date" class="form-control" name="start_date" 
+                   value="{{ today|date:'Y-m-d' }}" style="border-color: var(--coffee-border); border-radius: 10px;">
+        </div>
+        <div class="col-md-4">
+            <input type="date" class="form-control" name="end_date"
+                   value="{{ today|date:'Y-m-d' }}" style="border-color: var(--coffee-border); border-radius: 10px;">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel"></i> Xem báo cáo
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Thống kê -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card text-center" style="border-color: var(--coffee-brown); background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: var(--coffee-brown);">
+                <i class="bi bi-cash"></i>
+            </div>
+            <h6 class="text-muted mb-2">Doanh thu hôm nay</h6>
+            <h4 style="color: var(--coffee-brown);">{{ today_revenue|default:0|floatformat:0|intcomma }} ₫</h4>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card text-center" style="border-color: #4CAF50; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: #2e7d32;">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <h6 class="text-muted mb-2">Bill hôm nay</h6>
+            <h4 style="color: #2e7d32;">{{ today_bills|default:0 }}</h4>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card text-center" style="border-color: #2196F3; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: #1565c0;">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <h6 class="text-muted mb-2">Tổng doanh thu</h6>
+            <h4 style="color: #1565c0;">{{ total_revenue|default:0|floatformat:0|intcomma }} ₫</h4>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card text-center" style="border-color: #FF9800; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
+            <div class="mb-3" style="font-size: 3rem; color: #ef6c00;">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <h6 class="text-muted mb-2">Tổng bill</h6>
+            <h4 style="color: #ef6c00;">{{ total_bills|default:0 }}</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Nút xem chi tiết -->
+<div class="text-center mt-4">
+    <a href="{% url 'reports:revenue_report' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-bar-chart"></i> Xem báo cáo chi tiết
+    </a>
+</div>
+
+{% if not today_revenue and not today_bills %}
+<div class="stat-card mt-4 text-center">
+    <div style="font-size: 4rem; color: var(--coffee-muted); opacity: 0.5; margin-bottom: 20px;">
+        <i class="bi bi-graph-up"></i>
+    </div>
+    <h5 style="color: var(--coffee-muted);">Chưa có dữ liệu doanh thu và hóa đơn</h5>
+    <p class="text-muted mb-0">Vui lòng tạo đơn hàng hoặc chọn ngày khác</p>
+</div>
+{% endif %}
+{% endblock %}
